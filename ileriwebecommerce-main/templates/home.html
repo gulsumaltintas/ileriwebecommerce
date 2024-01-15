@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <div style="margin-top: 7rem;" class="container">
+    <div style="position: relative; top:200px" class="mt-5"></div>
+
+    <!--Section: Products v.3-->
+    <section class="text-center mb-4">
+      <div class="row">
+        <div class="col-3">
+          <select class="form-control" id="sorting">
+            <option value="bos">Sıralama Yap</option>
+            <option value="price">Artan Fiyat</option>
+            <option value="-price">Azalan Fiyat</option>
+          </select>
+        </div>
+        <div class="col-9">
+          <div class="card">
+            <div class="card-header">
+              <form class="theme-form">
+                <div class="input-group m-0 flex-nowrap">
+                  <input id="searchbarurun" class="form-control-plaintext" type="search"
+                    placeholder="Arama yapmak istediğiniz ürünü giriniz">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="row wow fadeIn">
+        <div class="row" id="item-container">
+          {% for item in object_list %}
+          <div class="col-lg-3 col-md-6 mb-4">
+
+            <div class="card">
+
+              <div class="view overlay">
+                {% comment %} <img src="https://mdbootstrap.com/img/Photos/Horizontal/E-commerce/Vertical/12.jpg"
+                  class="card-img-top" {% endcomment %} <img height="200" src="{{ item.image.url }}"
+                  class="card-img-top">
+                <a href="{{ item.get_absolute_url }}">
+                  <div class="mask rgba-white-slight"></div>
+                </a>
+              </div>
+
+              <div class="card-body text-center">
+                <a href="" class="grey-text">
+                  <h5>{{ item.Categories }}</h5>
+                </a>
+                <h5>
+                  <strong>
+                    <a href="{{ item.get_absolute_url }}" class="dark-grey-text">{{ item.title }}
+                      <span class="badge badge-pill {{ item.get_label_display }}-color">NEW</span>
+                    </a>
+                  </strong>
+                </h5>
+
+                <h4 class="font-weight-bold blue-text">
+                  <strong>
+                    {% if item.discount_price %}
+                    {{ item.discount_price }}
+                    {% else %}
+                    {{ item.price }}
+                    {% endif %}₺
+                  </strong>
+                </h4>
+
+              </div>
+
+            </div>
+
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </section>
+    <!--Section: Products v.3-->
+
+    <!--Pagination-->
+
+    {% if is_paginated %}
+    <nav class="d-flex justify-content-center wow fadeIn">
+      <ul class="pagination pg-blue">
+
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Previous</span>
+          </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+          <a class="page-link" href="?page={{ page_obj.number }}">{{ page_obj.number }}
+            <span class="sr-only">(current)</span>
+          </a>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+            <span class="sr-only">Next</span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
+  </div>
+</main>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchbarurun');
+    const itemContainer = document.getElementById('item-container');
+
+    searchInput.addEventListener('input', function () {
+      const searchText = searchInput.value.toLowerCase().trim();
+      const items = document.querySelectorAll('.col-lg-3');
+
+      items.forEach(function (item) {
+        const titleElement = item.querySelector('.dark-grey-text');
+
+        // Eğer başlık içinde aranan metin bulunuyorsa display'i inline block yap, yoksa none yap
+        if (titleElement.textContent.toLowerCase().includes(searchText)) {
+          item.style.display = 'inline-block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sortingSelect = document.getElementById('sorting');
+    const itemContainer = document.getElementById('item-container');
+
+    sortingSelect.addEventListener('change', function () {
+      const selectedValue = sortingSelect.value;
+
+      // AJAX veya başka bir yöntemle sıralama işlemini gerçekleştirin
+      // Bu örnekte sadece öğeleri yeniden sıralayarak simüle ediyoruz
+      const items = document.querySelectorAll('.col-lg-3');
+      const sortedItems = Array.from(items).sort(function (a, b) {
+        const priceA = parseFloat(a.querySelector('.font-weight-bold strong').textContent);
+        const priceB = parseFloat(b.querySelector('.font-weight-bold strong').textContent);
+
+        return selectedValue === 'price' ? priceA - priceB : priceB - priceA;
+      });
+
+      // Yeniden sıralanmış öğeleri container içine ekleyin
+      itemContainer.innerHTML = '';
+      sortedItems.forEach(function (item) {
+        itemContainer.appendChild(item);
+      });
+    });
+  });
+</script>
+{% endblock content %}
